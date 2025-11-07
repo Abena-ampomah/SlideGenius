@@ -1,24 +1,32 @@
+
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileUp, Sheet, FileText, X, Sparkles } from 'lucide-react';
 import React, { useState, useRef } from 'react';
+import { generateSlidesAction } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+import { PresentationViewer, Slide } from './presentation-viewer';
 
 export function DocumentConverter() {
     const [dragging, setDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [slides, setSlides] = useState<Slide[]>([]);
+    const { toast } = useToast();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setFile(e.target.files[0]);
+            setSlides([]);
         }
     };
 
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        setDragging(true);
+        if (!file) setDragging(true);
     };
 
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
@@ -30,6 +38,7 @@ export function DocumentConverter() {
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!file) setDragging(true);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -38,12 +47,14 @@ export function DocumentConverter() {
         setDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             setFile(e.dataTransfer.files[0]);
+            setSlides([]);
             e.dataTransfer.clearData();
         }
     };
 
     const handleClearFile = () => {
         setFile(null);
+        setSlides([]);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -55,8 +66,51 @@ export function DocumentConverter() {
         }
     };
 
+    const handleGenerate = async () => {
+        if (!file) return;
+
+        setIsLoading(true);
+        setSlides([]);
+
+        const reader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = async (event) => {
+            const fileContent = event.target?.result as string;
+            if (!fileContent) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error reading file',
+                    description: 'Could not read the content of the uploaded file.',
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            const result = await generateSlidesAction({ documentContent: fileContent });
+
+            if (result.slides) {
+                setSlides(result.slides);
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'Generation Failed',
+                    description: result.error || 'An unknown error occurred.',
+                });
+            }
+            setIsLoading(false);
+        };
+        reader.onerror = () => {
+            toast({
+                variant: 'destructive',
+                title: 'Error reading file',
+                description: 'An error occurred while reading the file.',
+            });
+            setIsLoading(false);
+        };
+    };
+
     return (
-        <div className="max-w-4xl mx-auto">
+        <>
             <Card className="shadow-lg">
                 <CardHeader>
                     <CardTitle className="text-2xl font-headline">Convert Your Documents</CardTitle>
@@ -69,7 +123,7 @@ export function DocumentConverter() {
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
-                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${file ? '' : 'cursor-pointer'} ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
+                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${file ? 'border-primary bg-secondary' : 'cursor-pointer'} ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
                     >
                         {file ? (
                             <div className="text-center">
@@ -81,7 +135,7 @@ export function DocumentConverter() {
                             <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
                                 <FileUp className="w-10 h-10 mb-4 text-muted-foreground" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">DOCX, CSV, XLSX (MAX. 10MB)</p>
+                                <p className="text-xs text-muted-foreground">TXT, MD, CSV (MAX. 10MB)</p>
                             </div>
                         )}
                         <input
@@ -90,24 +144,25 @@ export function DocumentConverter() {
                             type="file"
                             className="hidden"
                             onChange={handleFileChange}
-                            accept=".docx,.csv,.xlsx"
+                            accept=".txt,.md,.csv"
+                            disabled={isLoading}
                         />
                     </div>
                     <div className="mt-6 flex justify-center gap-4">
                         {!file && (
-                            <Button onClick={handleChooseFileClick}>
+                            <Button onClick={handleChooseFileClick} disabled={isLoading}>
                                 Choose File
                             </Button>
                         )}
                         {file && (
                            <>
-                            <Button variant="ghost" onClick={handleClearFile}>
+                            <Button variant="ghost" onClick={handleClearFile} disabled={isLoading}>
                                <X className="mr-2 h-4 w-4" />
                                Clear
                            </Button>
-                            <Button>
+                            <Button onClick={handleGenerate} disabled={isLoading}>
                                 <Sparkles className="mr-2 h-4 w-4" />
-                                Generate Presentation
+                                {isLoading ? 'Generating...' : 'Generate Presentation'}
                            </Button>
                            </>
                         )}
@@ -115,29 +170,33 @@ export function DocumentConverter() {
                 </CardContent>
             </Card>
 
-            <div className="mt-8">
-                <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
-                            <CardTitle className="text-lg">Documents</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .docx files into distinct slides.</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <div className="bg-secondary p-3 rounded-lg"><Sheet className="w-6 h-6 text-primary" /></div>
-                            <CardTitle className="text-lg">Spreadsheets</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">Generates individual slides from each row of data in your .csv or .xlsx files.</p>
-                        </CardContent>
-                    </Card>
+            <PresentationViewer slides={slides} isLoading={isLoading} />
+            
+            {!isLoading && slides.length === 0 && (
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
+                    <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
+                                <CardTitle className="text-lg">Text & Markdown</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .txt or .md files into distinct slides.</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <div className="bg-secondary p-3 rounded-lg"><Sheet className="w-6 h-6 text-primary" /></div>
+                                <CardTitle className="text-lg">Spreadsheets</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground">Generates individual slides from each row of data in your .csv files.</p>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 }

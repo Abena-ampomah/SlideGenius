@@ -16,6 +16,10 @@ import {
   answerUserQuestion,
   AnswerUserQuestionInput,
 } from '@/ai/flows/answer-user-questions-with-ai';
+import {
+  generateSlidesFromDocument,
+  GenerateSlidesFromDocumentInput,
+} from '@/ai/flows/generate-slides-from-document';
 
 export async function generateImageAction(input: GenerateImageForSlideInput) {
   try {
@@ -50,5 +54,16 @@ export async function faqAction(input: AnswerUserQuestionInput) {
   } catch (error) {
     console.error(error);
     return { error: 'Failed to get an answer. Please try again.' };
+  }
+}
+
+export async function generateSlidesAction(
+  input: GenerateSlidesFromDocumentInput
+) {
+  try {
+    return await generateSlidesFromDocument(input);
+  } catch (error) {
+    console.error(error);
+    return { error: 'Failed to generate presentation. Please try again.' };
   }
 }
