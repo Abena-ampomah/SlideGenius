@@ -10,10 +10,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {searchWeb} from '../../services/search-web';
+import {searchWeb} from '@/services/search-web';
 
 const AiWebResearchInputSchema = z.object({
-  topic: z.string().describe('The topic for which to gather data and statistics.'),
+  topic: z
+    .string()
+    .describe('The topic for which to gather data and statistics.'),
 });
 export type AiWebResearchInput = z.infer<typeof AiWebResearchInputSchema>;
 
@@ -30,26 +32,30 @@ export async function aiWebResearchForPresentation(
   return aiWebResearchFlow(input);
 }
 
-const AiWebResearchPromptInputSchema = z.object({
-  topic: z.string().describe('The topic for which to gather data and statistics.'),
-  searchResults: z.string().describe('The web search results for the topic.'),
-});
-
+const searchTool = ai.defineTool(
+  {
+    name: 'webSearch',
+    description: 'Search the web for information on a given topic.',
+    inputSchema: z.object({
+      query: z.string(),
+    }),
+    outputSchema: z.string(),
+  },
+  async input => {
+    return await searchWeb(input.query);
+  }
+);
 
 const prompt = ai.definePrompt({
   name: 'aiWebResearchPrompt',
-  input: {schema: AiWebResearchPromptInputSchema},
+  tools: [searchTool],
+  input: {schema: AiWebResearchInputSchema},
   output: {schema: AiWebResearchOutputSchema},
   prompt: `You are an AI assistant that researches data and statistics for presentation topics.
 
-  You will use the provided web search results to find relevant information and synthesize it into a coherent summary of data and statistics.
-
-  Topic: {{{topic}}}
+  Use the web search tool to find relevant information for the user's topic and then synthesize it into a coherent summary of data and statistics.
   
-  Search Results:
-  {{{searchResults}}}
-
-  Synthesized Research Data:`,
+  Topic: {{{topic}}}`,
 });
 
 const aiWebResearchFlow = ai.defineFlow(
@@ -59,13 +65,7 @@ const aiWebResearchFlow = ai.defineFlow(
     outputSchema: AiWebResearchOutputSchema,
   },
   async input => {
-    const searchResults = await searchWeb(input.topic);
-    const {output} = await prompt({
-      topic: input.topic,
-      searchResults,
-    });
-    return {
-      researchData: output!.researchData,
-    };
+    const {output} = await prompt(input);
+    return output!;
   }
 );
