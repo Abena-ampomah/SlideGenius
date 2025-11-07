@@ -7,6 +7,7 @@ import React, { useState, useRef } from 'react';
 import { generateSlidesAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { PresentationViewer, Slide } from './presentation-viewer';
+import mammoth from 'mammoth';
 
 export function DocumentConverter() {
     const [dragging, setDragging] = useState(false);
@@ -66,6 +67,21 @@ export function DocumentConverter() {
         }
     };
 
+    const processAndGenerateSlides = async (content: string) => {
+        const result = await generateSlidesAction({ documentContent: content });
+
+        if (result.slides) {
+            setSlides(result.slides);
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'Generation Failed',
+                description: result.error || 'An unknown error occurred.',
+            });
+        }
+        setIsLoading(false);
+    };
+
     const handleGenerate = async () => {
         if (!file) return;
 
@@ -73,40 +89,56 @@ export function DocumentConverter() {
         setSlides([]);
 
         const reader = new FileReader();
-        reader.readAsText(file);
-        reader.onload = async (event) => {
-            const fileContent = event.target?.result as string;
-            if (!fileContent) {
+
+        if (file.name.endsWith('.docx')) {
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target?.result as ArrayBuffer;
+                try {
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    await processAndGenerateSlides(result.value);
+                } catch (error) {
+                    console.error('Error processing .docx file:', error);
+                    toast({
+                        variant: 'destructive',
+                        title: 'Error reading .docx file',
+                        description: 'There was an issue extracting content from the Word document.',
+                    });
+                    setIsLoading(false);
+                }
+            };
+            reader.onerror = () => {
                 toast({
                     variant: 'destructive',
                     title: 'Error reading file',
-                    description: 'Could not read the content of the uploaded file.',
+                    description: 'An error occurred while reading the file.',
                 });
                 setIsLoading(false);
-                return;
-            }
-
-            const result = await generateSlidesAction({ documentContent: fileContent });
-
-            if (result.slides) {
-                setSlides(result.slides);
-            } else {
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.onload = async (event) => {
+                const fileContent = event.target?.result as string;
+                if (fileContent === null) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Error reading file',
+                        description: 'Could not read the content of the uploaded file.',
+                    });
+                    setIsLoading(false);
+                    return;
+                }
+                await processAndGenerateSlides(fileContent);
+            };
+            reader.onerror = () => {
                 toast({
                     variant: 'destructive',
-                    title: 'Generation Failed',
-                    description: result.error || 'An unknown error occurred.',
+                    title: 'Error reading file',
+                    description: 'An error occurred while reading the file.',
                 });
-            }
-            setIsLoading(false);
-        };
-        reader.onerror = () => {
-            toast({
-                variant: 'destructive',
-                title: 'Error reading file',
-                description: 'An error occurred while reading the file.',
-            });
-            setIsLoading(false);
-        };
+                setIsLoading(false);
+            };
+            reader.readAsText(file);
+        }
     };
 
     return (
@@ -135,7 +167,7 @@ export function DocumentConverter() {
                             <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
                                 <FileUp className="w-10 h-10 mb-4 text-muted-foreground" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">TXT, MD, CSV (MAX. 10MB)</p>
+                                <p className="text-xs text-muted-foreground">DOCX, TXT, MD, CSV (MAX. 10MB)</p>
                             </div>
                         )}
                         <input
@@ -144,16 +176,11 @@ export function DocumentConverter() {
                             type="file"
                             className="hidden"
                             onChange={handleFileChange}
-                            accept=".txt,.md,.csv"
+                            accept=".docx,.txt,.md,.csv"
                             disabled={isLoading}
                         />
                     </div>
                     <div className="mt-6 flex justify-center gap-4">
-                        {!file && (
-                            <Button onClick={handleChooseFileClick} disabled={isLoading}>
-                                Choose File
-                            </Button>
-                        )}
                         {file && (
                            <>
                             <Button variant="ghost" onClick={handleClearFile} disabled={isLoading}>
@@ -175,7 +202,16 @@ export function DocumentConverter() {
             {!isLoading && slides.length === 0 && (
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
-                    <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center gap-4">
+                                <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
+                                <CardTitle className="text-lg">Word Docs</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .docx files into distinct slides.</p>
+                            </CardContent>
+                        </Card>
                         <Card>
                             <CardHeader className="flex flex-row items-center gap-4">
                                 <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
