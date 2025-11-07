@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   Carousel,
@@ -31,20 +32,22 @@ export function Templates() {
               {PlaceHolderImages.map((template) => (
                 <CarouselItem key={template.id} className="md:basis-1/2 lg:basis-1/3">
                   <div className="p-1">
-                    <Card className="overflow-hidden">
-                      <CardContent className="flex aspect-video items-center justify-center p-0 relative">
-                        <Image
-                          src={template.imageUrl}
-                          alt={template.description}
-                          width={600}
-                          height={400}
-                          data-ai-hint={template.imageHint}
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <h3 className="absolute bottom-4 left-4 text-xl font-bold text-white font-headline">{template.name}</h3>
-                      </CardContent>
-                    </Card>
+                    <Link href="/dashboard">
+                      <Card className="overflow-hidden group">
+                        <CardContent className="flex aspect-video items-center justify-center p-0 relative">
+                          <Image
+                            src={template.imageUrl}
+                            alt={template.description}
+                            width={600}
+                            height={400}
+                            data-ai-hint={template.imageHint}
+                            className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                          <h3 className="absolute bottom-4 left-4 text-xl font-bold text-white font-headline">{template.name}</h3>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   </div>
                 </CarouselItem>
               ))}
