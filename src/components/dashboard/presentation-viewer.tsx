@@ -46,7 +46,40 @@ export function PresentationViewer({ slides, isLoading }: PresentationViewerProp
   }
 
   if (slides.length === 0) {
-    return null;
+    return (
+        <div className="mt-8">
+            <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
+            <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
+                        <CardTitle className="text-lg">Word Docs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .docx files into distinct slides.</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
+                        <CardTitle className="text-lg">Text & Markdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .txt or .md files into distinct slides.</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <div className="bg-secondary p-3 rounded-lg"><Sheet className="w-6 h-6 text-primary" /></div>
+                        <CardTitle className="text-lg">Spreadsheets</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground">Generates individual slides from each row of data in your .csv files.</p>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
   }
 
   return (

@@ -6,15 +6,19 @@ import { FileUp, Sheet, FileText, X, Sparkles } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 import { generateSlidesAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
-import { PresentationViewer, Slide } from './presentation-viewer';
+import type { Slide } from './presentation-viewer';
 import mammoth from 'mammoth';
 
-export function DocumentConverter() {
+interface DocumentConverterProps {
+    setSlides: React.Dispatch<React.SetStateAction<Slide[]>>;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export function DocumentConverter({ setSlides, setIsLoading }: DocumentConverterProps) {
     const [dragging, setDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [slides, setSlides] = useState<Slide[]>([]);
+    const [isProcessing, setIsProcessing] = useState(false);
     const { toast } = useToast();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,12 +84,14 @@ export function DocumentConverter() {
             });
         }
         setIsLoading(false);
+        setIsProcessing(false);
     };
 
     const handleGenerate = async () => {
         if (!file) return;
 
         setIsLoading(true);
+        setIsProcessing(true);
         setSlides([]);
 
         const reader = new FileReader();
@@ -104,6 +110,7 @@ export function DocumentConverter() {
                         description: 'There was an issue extracting content from the Word document.',
                     });
                     setIsLoading(false);
+                    setIsProcessing(false);
                 }
             };
             reader.onerror = () => {
@@ -113,6 +120,7 @@ export function DocumentConverter() {
                     description: 'An error occurred while reading the file.',
                 });
                 setIsLoading(false);
+                setIsProcessing(false);
             };
             reader.readAsArrayBuffer(file);
         } else {
@@ -125,6 +133,7 @@ export function DocumentConverter() {
                         description: 'Could not read the content of the uploaded file.',
                     });
                     setIsLoading(false);
+                    setIsProcessing(false);
                     return;
                 }
                 await processAndGenerateSlides(fileContent);
@@ -136,6 +145,7 @@ export function DocumentConverter() {
                     description: 'An error occurred while reading the file.',
                 });
                 setIsLoading(false);
+                setIsProcessing(false);
             };
             reader.readAsText(file);
         }
@@ -177,19 +187,19 @@ export function DocumentConverter() {
                             className="hidden"
                             onChange={handleFileChange}
                             accept=".docx,.txt,.md,.csv"
-                            disabled={isLoading}
+                            disabled={isProcessing}
                         />
                     </div>
                     <div className="mt-6 flex justify-center gap-4">
                         {file && (
                            <>
-                            <Button variant="ghost" onClick={handleClearFile} disabled={isLoading}>
+                            <Button variant="ghost" onClick={handleClearFile} disabled={isProcessing}>
                                <X className="mr-2 h-4 w-4" />
                                Clear
                            </Button>
-                            <Button onClick={handleGenerate} disabled={isLoading}>
+                            <Button onClick={handleGenerate} disabled={isProcessing}>
                                 <Sparkles className="mr-2 h-4 w-4" />
-                                {isLoading ? 'Generating...' : 'Generate Presentation'}
+                                {isProcessing ? 'Generating...' : 'Generate Presentation'}
                            </Button>
                            </>
                         )}
@@ -197,9 +207,7 @@ export function DocumentConverter() {
                 </CardContent>
             </Card>
 
-            <PresentationViewer slides={slides} isLoading={isLoading} />
-            
-            {!isLoading && slides.length === 0 && (
+            {(isProcessing) && (
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
                     <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
