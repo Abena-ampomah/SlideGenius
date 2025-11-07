@@ -31,7 +31,7 @@ export function DocumentConverter({ setSlides, setIsLoading }: DocumentConverter
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!file) setDragging(true);
+        if (!file && !isProcessing) setDragging(true);
     };
 
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
@@ -43,14 +43,14 @@ export function DocumentConverter({ setSlides, setIsLoading }: DocumentConverter
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!file) setDragging(true);
+        if (!file && !isProcessing) setDragging(true);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setDragging(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        if (!isProcessing && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             setFile(e.dataTransfer.files[0]);
             setSlides([]);
             e.dataTransfer.clearData();
@@ -66,7 +66,7 @@ export function DocumentConverter({ setSlides, setIsLoading }: DocumentConverter
     };
     
     const handleChooseFileClick = () => {
-        if (!file) {
+        if (!file && !isProcessing) {
             fileInputRef.current?.click();
         }
     };
@@ -165,7 +165,7 @@ export function DocumentConverter({ setSlides, setIsLoading }: DocumentConverter
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
-                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${file ? 'border-primary bg-secondary' : 'cursor-pointer'} ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
+                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${file ? 'border-primary bg-secondary' : 'cursor-pointer'} ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'} ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}
                     >
                         {file ? (
                             <div className="text-center">
