@@ -1,31 +1,56 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileUp, Sheet, FileText } from 'lucide-react';
-import React from 'react';
+import { FileUp, Sheet, FileText, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
 
 export function DocumentConverter() {
-    const [dragging, setDragging] = React.useState(false);
+    const [dragging, setDragging] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setFile(e.target.files[0]);
+        }
+    };
 
     const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setDragging(true);
     };
+
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setDragging(false);
     };
+
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
     };
+
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
         setDragging(false);
-        // Handle file drop logic here
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            setFile(e.dataTransfer.files[0]);
+            e.dataTransfer.clearData();
+        }
+    };
+
+    const handleClearFile = () => {
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+    
+    const handleChooseFileClick = () => {
+        fileInputRef.current?.click();
     };
 
     return (
@@ -37,23 +62,45 @@ export function DocumentConverter() {
                 </CardHeader>
                 <CardContent>
                     <div
+                        onClick={handleChooseFileClick}
                         onDragEnter={handleDragEnter}
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
-                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
+                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
                     >
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                            <FileUp className="w-10 h-10 mb-4 text-muted-foreground" />
-                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
-                            <p className="text-xs text-muted-foreground">DOCX, CSV, XLSX (MAX. 10MB)</p>
-                        </div>
-                        <input id="dropzone-file" type="file" className="hidden" />
+                        {file ? (
+                            <div className="text-center">
+                                <FileText className="w-10 h-10 mx-auto mb-4 text-primary" />
+                                <p className="font-semibold">{file.name}</p>
+                                <p className="text-sm text-muted-foreground">{Math.round(file.size / 1024)} KB</p>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                                <FileUp className="w-10 h-10 mb-4 text-muted-foreground" />
+                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
+                                <p className="text-xs text-muted-foreground">DOCX, CSV, XLSX (MAX. 10MB)</p>
+                            </div>
+                        )}
+                        <input
+                            ref={fileInputRef}
+                            id="dropzone-file"
+                            type="file"
+                            className="hidden"
+                            onChange={handleFileChange}
+                            accept=".docx,.csv,.xlsx"
+                        />
                     </div>
-                    <div className="mt-6 flex justify-center">
-                        <Button>
-                            <label htmlFor="dropzone-file" className="cursor-pointer">Choose File</label>
+                    <div className="mt-6 flex justify-center gap-4">
+                        <Button onClick={handleChooseFileClick}>
+                            Choose File
                         </Button>
+                        {file && (
+                           <Button variant="ghost" onClick={handleClearFile}>
+                               <X className="mr-2 h-4 w-4" />
+                               Clear
+                           </Button>
+                        )}
                     </div>
                 </CardContent>
             </Card>
