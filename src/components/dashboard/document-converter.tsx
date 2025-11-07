@@ -1,0 +1,86 @@
+'use client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { FileUp, Sheet, FileText } from 'lucide-react';
+import React from 'react';
+
+export function DocumentConverter() {
+    const [dragging, setDragging] = React.useState(false);
+
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(true);
+    };
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(false);
+    };
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragging(false);
+        // Handle file drop logic here
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto">
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-headline">Convert Your Documents</CardTitle>
+                    <CardDescription>Upload a document or spreadsheet to magically convert it into a presentation.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
+                    >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                            <FileUp className="w-10 h-10 mb-4 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold text-primary">Click to upload</span> or drag and drop</p>
+                            <p className="text-xs text-muted-foreground">DOCX, CSV, XLSX (MAX. 10MB)</p>
+                        </div>
+                        <input id="dropzone-file" type="file" className="hidden" />
+                    </div>
+                    <div className="mt-6 flex justify-center">
+                        <Button>
+                            <label htmlFor="dropzone-file" className="cursor-pointer">Choose File</label>
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="mt-8">
+                <h3 className="text-lg font-semibold text-center mb-4 font-headline">Supported Formats</h3>
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <div className="bg-secondary p-3 rounded-lg"><FileText className="w-6 h-6 text-primary" /></div>
+                            <CardTitle className="text-lg">Documents</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">Converts headings, paragraphs, and lists from .docx files into distinct slides.</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <div className="bg-secondary p-3 rounded-lg"><Sheet className="w-6 h-6 text-primary" /></div>
+                            <CardTitle className="text-lg">Spreadsheets</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-sm text-muted-foreground">Generates individual slides from each row of data in your .csv or .xlsx files.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}

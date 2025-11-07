@@ -1,3 +1,53 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "template-marketing",
+      "name": "Marketing Plan",
+      "description": "A dynamic template for marketing presentations.",
+      "imageUrl": "https://images.unsplash.com/photo-1639825395303-94c8441b8b13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYXJrZXRpbmclMjBjaGFydHN8ZW58MHx8fHwxNzYyNDc3MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "marketing charts"
+    },
+    {
+      "id": "template-advertising",
+      "name": "Ad Campaign",
+      "description": "A bold template for advertising campaigns.",
+      "imageUrl": "https://images.unsplash.com/photo-1676491394429-37341c0ef75a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxhZHZlcnRpc2luZyUyMGJpbGxib2FyZHxlbnwwfHx8fDE3NjI0NzcwNjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "advertising billboard"
+    },
+    {
+      "id": "template-copywriting",
+      "name": "Copywriting Portfolio",
+      "description": "A clean template for copywriting portfolios.",
+      "imageUrl": "https://images.unsplash.com/photo-1561172475-1b46606fad37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx0ZXh0JTIwbm90ZWJvb2t8ZW58MHx8fHwxNzYyNDc3MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "text notebook"
+    },
+    {
+      "id": "template-social-media",
+      "name": "Social Media Report",
+      "description": "An engaging template for social media analytics.",
+      "imageUrl": "https://images.unsplash.com/photo-1603145733146-ae562a55031e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NjI0NTIzNTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "social media"
+    },
+    {
+      "id": "template-digital-marketing",
+      "name": "Digital Marketing",
+      "description": "A data-driven template for digital marketing reports.",
+      "imageUrl": "https://images.unsplash.com/photo-1537731121640-bc1c4aba9b80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxkaWdpdGFsJTIwbWFya2V0aW5nfGVufDB8fHx8MTc2MjQyNTU4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital marketing"
+    },
+    {
+      "id": "template-creative-portfolio",
+      "name": "Creative Portfolio",
+      "description": "A stylish template for creative portfolios.",
+      "imageUrl": "https://images.unsplash.com/photo-1507643179773-3e975d7ac515?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhcnQlMjBnYWxsZXJ5fGVufDB8fHx8MTc2MjM5MTkxNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "art gallery"
+    },
+    {
+      "id": "template-ai-consultant",
+      "name": "AI Consultant",
+      "description": "A futuristic template for AI consultants.",
+      "imageUrl": "https://images.unsplash.com/photo-1749006590324-d6b2e90ab1c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhaSUyMGNpcmN1aXR8ZW58MHx8fHwxNzYyNDc3MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ai circuit"
+    }
+  ]
 }

@@ -1,17 +1,13 @@
+import { FaqClient } from '@/components/faq/faq-client';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Hero } from '@/components/landing/hero';
-import { Features } from '@/components/landing/features';
-import { Templates } from '@/components/landing/templates';
 
-export default function Home() {
+export default function FaqPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
-        <Hero />
-        <Features />
-        <Templates />
+        <FaqClient />
       </main>
       <Footer />
     </div>
