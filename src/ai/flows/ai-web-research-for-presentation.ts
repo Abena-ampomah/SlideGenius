@@ -10,7 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {searchWeb} from '@/services/search-web';
+import {searchWeb} from '../../services/search-web';
 
 const AiWebResearchInputSchema = z.object({
   topic: z.string().describe('The topic for which to gather data and statistics.'),
@@ -30,16 +30,26 @@ export async function aiWebResearchForPresentation(
   return aiWebResearchFlow(input);
 }
 
+const AiWebResearchPromptInputSchema = z.object({
+  topic: z.string().describe('The topic for which to gather data and statistics.'),
+  searchResults: z.string().describe('The web search results for the topic.'),
+});
+
+
 const prompt = ai.definePrompt({
   name: 'aiWebResearchPrompt',
-  input: {schema: AiWebResearchInputSchema},
+  input: {schema: AiWebResearchPromptInputSchema},
   output: {schema: AiWebResearchOutputSchema},
   prompt: `You are an AI assistant that researches data and statistics for presentation topics.
 
-  You will search the web for relevant information and incorporate it into the presentation.
+  You will use the provided web search results to find relevant information and synthesize it into a coherent summary of data and statistics.
 
   Topic: {{{topic}}}
-  Research Data:`,
+  
+  Search Results:
+  {{{searchResults}}}
+
+  Synthesized Research Data:`,
 });
 
 const aiWebResearchFlow = ai.defineFlow(
@@ -51,7 +61,7 @@ const aiWebResearchFlow = ai.defineFlow(
   async input => {
     const searchResults = await searchWeb(input.topic);
     const {output} = await prompt({
-      ...input,
+      topic: input.topic,
       searchResults,
     });
     return {
