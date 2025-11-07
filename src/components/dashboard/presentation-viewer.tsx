@@ -10,7 +10,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '../ui/skeleton';
-import { Presentation } from 'lucide-react';
+import { Presentation, FileText, Sheet } from 'lucide-react';
 
 export type Slide = {
   title: string;
