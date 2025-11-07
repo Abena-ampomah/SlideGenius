@@ -1,7 +1,7 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileUp, Sheet, FileText, X } from 'lucide-react';
+import { FileUp, Sheet, FileText, X, Sparkles } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 
 export function DocumentConverter() {
@@ -50,7 +50,9 @@ export function DocumentConverter() {
     };
     
     const handleChooseFileClick = () => {
-        fileInputRef.current?.click();
+        if (!file) {
+            fileInputRef.current?.click();
+        }
     };
 
     return (
@@ -67,7 +69,7 @@ export function DocumentConverter() {
                         onDragLeave={handleDragLeave}
                         onDragOver={handleDragOver}
                         onDrop={handleDrop}
-                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors cursor-pointer ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
+                        className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg transition-colors ${file ? '' : 'cursor-pointer'} ${dragging ? 'border-primary bg-secondary' : 'border-border hover:border-primary'}`}
                     >
                         {file ? (
                             <div className="text-center">
@@ -92,14 +94,22 @@ export function DocumentConverter() {
                         />
                     </div>
                     <div className="mt-6 flex justify-center gap-4">
-                        <Button onClick={handleChooseFileClick}>
-                            Choose File
-                        </Button>
+                        {!file && (
+                            <Button onClick={handleChooseFileClick}>
+                                Choose File
+                            </Button>
+                        )}
                         {file && (
-                           <Button variant="ghost" onClick={handleClearFile}>
+                           <>
+                            <Button variant="ghost" onClick={handleClearFile}>
                                <X className="mr-2 h-4 w-4" />
                                Clear
                            </Button>
+                            <Button>
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                Generate Presentation
+                           </Button>
+                           </>
                         )}
                     </div>
                 </CardContent>
